@@ -1,6 +1,22 @@
-import Testing
 @testable import Cool
+import Testing
 
-@Test func example() async throws {
-    // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+extension VaultKeys {
+  var cool: VaultKey<String> { .init("test", default: "foo") }
+}
+
+@Test func vaultBasic() async throws {
+  #expect(Vault.cool == "foo")
+
+  Vault.cool = "custom"
+  #expect(Vault.cool == "custom")
+  VaultKeys().cool.reset()
+  #expect(Vault.cool == "foo")
+
+  Vault.cool = "custom 2"
+  #expect(Vault.cool == "custom 2")
+  Vault.reset(\.cool)
+  #expect(Vault.cool == "foo")
+
+  Vault[\.cool] = "hello"
 }
