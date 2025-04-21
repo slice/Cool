@@ -24,15 +24,15 @@ extension CoolError: Error {
 }
 
 public extension Optional {
-  @_alwaysEmitIntoClient
-  func orThrow<Error: Swift.Error>(_ error: Error) throws(Error) -> Wrapped {
-    guard let self else { throw error }
+  @_transparent
+  func orThrow<Error: Swift.Error>(_ error: @autoclosure () -> Error) throws(Error) -> Wrapped {
+    guard let self else { throw error() }
     return self
   }
 
-  @_alwaysEmitIntoClient
-  func orThrow(_ message: String, _ file: StaticString = #file, _ line: UInt = #line) throws -> Wrapped {
-    guard let self else { throw CoolError(description: message, file: file, line: line) }
+  @_transparent
+  func orThrow(_ message: @autoclosure () -> String, _ file: StaticString = #file, _ line: UInt = #line) throws -> Wrapped {
+    guard let self else { throw CoolError(description: message(), file: file, line: line) }
     return self
   }
 }
