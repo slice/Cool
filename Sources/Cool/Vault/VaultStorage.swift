@@ -1,8 +1,9 @@
+import os
 import SwiftUI
 
 // https://saagarjha.com/blog/2024/02/27/making-friends-with-attributegraph/
 
-@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(macOS 13, iOS 16, tvOS 16, watchOS 9, *)
 @propertyWrapper
 public struct VaultStorage<Value: VaultValue> {
   let key: VaultKey<Value>
@@ -10,9 +11,9 @@ public struct VaultStorage<Value: VaultValue> {
   @State
   var _update = false
 
-  private final class Observer: NSObject {
+  private final class Observer: NSObject, Sendable {
     let key: String
-    var _update: State<Bool>!
+    let _update = OSAllocatedUnfairLock<State<Bool>?>(initialState: nil)
 
     init(key: VaultKey<Value>) {
       self.key = key.name
@@ -25,13 +26,13 @@ public struct VaultStorage<Value: VaultValue> {
     }
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
-      _update.wrappedValue.toggle()
+      _update.withLock { $0?.wrappedValue.toggle() }
     }
   }
 
   private let observer: Observer
 
-  init(_ key: KeyPath<VaultKeys, VaultKey<Value>>) {
+  public init(_ key: KeyPath<VaultKeys, VaultKey<Value>>) {
     self.key = VaultKeys()[keyPath: key]
     observer = Observer(key: self.key)
   }
@@ -47,21 +48,27 @@ public struct VaultStorage<Value: VaultValue> {
       key.value = newValue
     }
   }
-  
-  // FIXME: not concurrency safe
-  //  var projectedValue: Binding<Value> {
-  //    Binding(get: { wrappedValue }, set: { wrappedValue = $0 })
-  //  }
-}
 
-@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-extension VaultStorage: DynamicProperty {
-  public func update() {
-    observer._update = __update
+  public var projectedValue: Binding<Value> {
+    Binding(get: { wrappedValue }, set: { wrappedValue = $0 })
   }
 }
 
-@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+@available(macOS 13, iOS 16, tvOS 16, watchOS 9, *)
+extension VaultStorage: Sendable where Value: Sendable {
+  public var projectedValue: Binding<Value> {
+    Binding(get: { wrappedValue }, set: { wrappedValue = $0 })
+  }
+}
+
+@available(macOS 13, iOS 16, tvOS 16, watchOS 9, *)
+extension VaultStorage: DynamicProperty {
+  public func update() {
+    observer._update.withLockUnchecked { $0 = __update }
+  }
+}
+
+@available(macOS 13, iOS 16, tvOS 16, watchOS 9, *)
 extension VaultStorage {
   var hasExplicitValue: Bool {
     UserDefaults.standard.value(forKey: key.name) != nil

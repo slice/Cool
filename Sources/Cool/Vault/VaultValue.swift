@@ -3,17 +3,29 @@ import Foundation
 public protocol VaultValue {
   associatedtype VaultRepresentation = Self
   init?(userDefaultsRepresentation: VaultRepresentation)
+  var userDefaultsRepresentation: VaultRepresentation { get }
 }
 
-extension VaultValue where VaultRepresentation == Self {
-  public init?(userDefaultsRepresentation: VaultRepresentation) {
+public extension VaultValue where VaultRepresentation == Self {
+  init?(userDefaultsRepresentation: VaultRepresentation) {
     self = userDefaultsRepresentation
   }
+
+  var userDefaultsRepresentation: VaultRepresentation { self }
 }
 
 extension Int: VaultValue {}
 
-extension Double: VaultValue {}
+extension Double: VaultValue {
+  public typealias VaultRepresentation = String
+
+  public init?(userDefaultsRepresentation: String) {
+    guard let double = Double(userDefaultsRepresentation) else { return nil }
+    self = double
+  }
+
+  public var userDefaultsRepresentation: String { String(self) }
+}
 
 extension Bool: VaultValue {}
 
@@ -22,11 +34,3 @@ extension String: VaultValue {}
 extension URL: VaultValue {}
 
 extension Data: VaultValue {}
-
-extension Optional: VaultValue where Wrapped: VaultValue {
-  public typealias VaultRepresentation = Wrapped.VaultRepresentation
-
-  public init?(userDefaultsRepresentation: Wrapped.VaultRepresentation) {
-    self = Wrapped(userDefaultsRepresentation: userDefaultsRepresentation)
-  }
-}

@@ -4,7 +4,7 @@ public struct VaultKey<Value: VaultValue> {
   public let name: String
   public let defaultValue: Value
 
-  init(_ name: String, default value: Value) {
+  public init(_ name: String, default value: Value) {
     self.name = name
     defaultValue = value
   }
@@ -18,18 +18,11 @@ public struct VaultKey<Value: VaultValue> {
       }
       return value
     }
-    nonmutating set { UserDefaults.standard.setValue(newValue, forKey: name) }
+    nonmutating set { UserDefaults.standard.set(newValue.userDefaultsRepresentation, forKey: name) }
   }
 
   public func reset() {
     UserDefaults.standard.removeObject(forKey: name)
-  }
-}
-
-extension VaultKey {
-  public init<Wrapped>(_ name: String) where Value == Wrapped? {
-    self.name = name
-    defaultValue = nil
   }
 }
 
