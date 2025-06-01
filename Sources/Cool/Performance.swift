@@ -13,7 +13,7 @@ func format(nanoseconds nanos: UInt64) -> String {
 
 extension StringProtocol {
   @usableFromInline
-  func displayingForMeasurement() -> some StringProtocol {
+  func displayingForMeasurement() -> String {
     truncating(toOverallMaxLength: 32).padded(toMinLength: 32)
   }
 }
