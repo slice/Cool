@@ -6,7 +6,7 @@ public struct VaultKey<Value: VaultValue> {
 
   public init(_ name: String, default value: Value) {
     self.name = name
-    defaultValue = value
+    self.defaultValue = value
   }
 
   public var value: Value {

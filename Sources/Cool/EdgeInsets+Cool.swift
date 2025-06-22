@@ -1,3 +1,5 @@
+#if canImport(SwiftUI)
+
 import SwiftUI
 
 @available(iOS 13, macOS 10.15, tvOS 13, watchOS 6, *)
@@ -7,3 +9,5 @@ public extension EdgeInsets {
     self.init(top: vertical, leading: horizontal, bottom: vertical, trailing: horizontal)
   }
 }
+
+#endif

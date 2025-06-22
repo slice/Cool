@@ -2,7 +2,7 @@ public class Box<Boxed> {
   public var inner: Boxed
 
   public init(boxing value: Boxed) {
-    inner = value
+    self.inner = value
   }
 }
 

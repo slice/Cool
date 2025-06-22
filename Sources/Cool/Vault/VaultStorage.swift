@@ -1,3 +1,5 @@
+#if canImport(SwiftUI)
+
 import os
 import SwiftUI
 
@@ -34,7 +36,7 @@ public struct VaultStorage<Value: VaultValue> {
 
   public init(_ key: KeyPath<VaultKeys, VaultKey<Value>>) {
     self.key = VaultKeys()[keyPath: key]
-    observer = Observer(key: self.key)
+    self.observer = Observer(key: self.key)
   }
 
   public var wrappedValue: Value {
@@ -78,3 +80,5 @@ extension VaultStorage {
     UserDefaults.standard.removeObject(forKey: key.name)
   }
 }
+
+#endif

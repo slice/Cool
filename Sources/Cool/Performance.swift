@@ -1,3 +1,5 @@
+#if canImport(Darwin)
+
 import Darwin
 
 @inlinable
@@ -39,3 +41,5 @@ public func measure<T>(_ label: String, _ action: () throws -> T) rethrows -> T 
   print("⏰ \(label.displayingForMeasurement()): \(format(nanoseconds: end - start))")
   return result
 }
+
+#endif
